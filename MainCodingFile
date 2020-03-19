@@ -1,0 +1,55 @@
+setwd("E:\\Harddrive\\OneDrive - Lund University\\Mastern\\Spring 2020\\NEKN34 Time Series Analysis\\Assignments\\Ass 3")
+getwd()
+
+install.packages("")
+library(urca)
+library(tseries)
+library(tsDyn)
+library(lmtest)
+library(car)
+library(data.table) #used for shifting, aka lagging
+library(dynlm)
+library(readxl)
+##
+"
+1. test for cointegration of ip & m1
+1a. if cointrgration doesnt exist then use VAR
+2. use the tests from the course to in order to not include unrelated but (together) cointegrated variables
+
+
+"
+##
+data = read_excel("MoneyIncome.xlsx")
+plot(data$t, data$ip)
+plot(data$t, data$m1)
+plot(c(data$t, data$t), c(data$m1, data$ip))
+summary(data)
+######
+data[,2:3]
+po.test(data[,2:3])
+tsdata = ts(data)
+VectorError = VECM(tsdata[,2:3], lag = 1, r = 1, include = "const") #VECM MUST have time series
+summary(VectorError)
+
+dl = dynlm(ip ~ m1 + m1lag1, data = test)
+plot(dl$residuals)
+###-----
+#testing if VAR might be any good, forgot to take first difference on the linear regression parts :(
+
+
+ddata = data.frame(diff(data$ip), diff(data$m1), data$t[1:731]) #creates differenced data and adds the time 
+plot(ddata$diff.data.ip.)
+plot(ddata$diff.data.m1.)
+
+test = data
+test$m1lag1 = shift(test$m1)
+test$m1lag2 = shift(test$m1lag1)
+test$iplag1 = shift(test$ip)
+test$iplag2 = shift(test$iplag1)
+
+
+dl = dynlm(ip ~ m1 + m1lag1 + m1lag2 + iplag1 + iplag2, data = test)
+summary(dl)
+
+grangertest(data$ip, data$m1, 2)
+linearHypothesis(dl,"m1lag1 - m1lag2" )
