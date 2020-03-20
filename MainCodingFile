@@ -30,10 +30,34 @@ adf.test(data$ip)
 adf.test(data$m1)
 summary(data)
 #testing for cointegration----
-VARselect(data[,2:3], lag.max = 12, type = "const", season = 12)$select #displays a bunch of information criterion values, 10 seems to be a good number 
+VARselect(data[,2:3], lag.max = 10, type = "const", season = 12)$select #displays a bunch of information criterion values, 10 seems to be a good number 
 cointest = ca.jo(data[,2:3], type = "trace", ecdet = "const", season = 12)
-summary(cointest)
-# pre 1980s
+summary(cointest) #from this we can see that the test-statistic is much greater than the critical values, at the 5% level, we have two cointegrating variables
+
+vecm = cajorls(cointest, r = 1)
+vecm$rlm #really strange because it shows that the "error correction term" are almost zero. ("error correction term" = "speed of adjustment" in our notes)
+vecm$beta
+
+#split the data into pre, post and during the 80s as per the literature
+datapre80 = data[1:252,]
+datapost80 = data[373:length(data),]
+data80 = data[253:length(data),]
+
+#full dataset
+vecm_full = VECM(data[,2:3], lag = 10, r = 1, estim = "2OLS")
+summary(vecm_full) # the interpretation of the first value of "m1 -3" is that m1 from 3 periods ago affects current ip by -0.0043
+
+#pre 80s dataset
+vecm_pre = VECM(datapre80[,2:3], lag = 10, r = 1, estim = "2OLS")
+summary(vecm_pre) 
+
+#post 80s dataset
+vecm_post = VECM(datapost80[,2:3], lag = 10, r = 1, estim = "2OLS")
+summary(vecm_post)
+
+#during 80s dataset
+vecm_80 = VECM(data80[,2:3], lag = 10, r = 1, estim = "2OLS")
+summary(vecm_80) 
 
 
 
