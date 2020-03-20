@@ -11,16 +11,8 @@ library(car)
 library(data.table) #used for shifting, aka lagging
 library(dynlm)
 library(readxl)
-##
-"
-1. test for cointegration of ip & m1
-  They are cointegrated! r = 1, so there´s only one cointegrating relationship
-1a. if cointrgration doesnt exist then use VAR
-2. use the tests from the course to in order to not include unrelated but (together) cointegrated variables
 
 
-"
-##
 data = read_excel("MoneyIncome.xlsx")
 
 #tests for stationarity----
@@ -30,7 +22,7 @@ adf.test(data$ip)
 adf.test(data$m1)
 summary(data)
 #testing for cointegration----
-VARselect(data[,2:3], lag.max = 10, type = "const", season = 12)$select #displays a bunch of information criterion values, 10 seems to be a good number 
+VARselect(data[,2:3], lag.max = 10, type = "const", season = 12)$select #displays a bunch of information criterion values, 10 seems to be a good number of lags
 cointest = ca.jo(data[,2:3], type = "trace", ecdet = "const", season = 12)
 summary(cointest) #from this we can see that the test-statistic is much greater than the critical values, at the 5% level, we have two cointegrating variables
 
@@ -58,12 +50,31 @@ summary(vecm_post)
 #during 80s dataset
 vecm_80 = VECM(data80[,2:3], lag = 10, r = 1, estim = "2OLS")
 summary(vecm_80) 
+coefPI(vecm_80)
+plot(vecm_full)
+# how VECM interprets significance codes: ** = 0.001    * = 0.01    . = 0.05
+#VAR-----
+Var_full = VAR(diff(ts(data[,2:3])), p =4 , type = "const", season = 12)
+summary(Var1)
+causality(Var_full, cause = "m1") #the one of interest, m1 does not cause ip
+causality(Var_full, cause = "ip") #aux causality, ip causes m1
 
+Var_pre = VAR(diff(ts(datapre80[,2:3])), p =4 , type = "const", season = 12)
+summary(Var_pre)
+causality(Var_pre, cause = "m1") # m1 does not cause ip
+causality(Var_pre, cause = "ip")
 
+Var_post = VAR(diff(ts(datapost80[,2:3])), p =4 , type = "const", season = 12)
+summary(Var_post)
+causality(Var_post, cause = "m1")  # m1 does not cause ip
+causality(Var_post, cause = "ip")
 
+Var_80 = VAR(diff(ts(data80[,2:3])), p =4 , type = "const", season = 12)
+summary(Var_80)
+causality(Var_80, cause = "m1")  # m1 DOES cause ip
+causality(Var_80, cause = "ip")
 
-
-
+#previous stuff & possible trash-----
 data[,2:3]
 po.test(data[,2:3])
 tsdata = ts(data)
