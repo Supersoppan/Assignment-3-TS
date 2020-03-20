@@ -2,6 +2,7 @@ setwd("E:\\Harddrive\\OneDrive - Lund University\\Mastern\\Spring 2020\\NEKN34 T
 getwd()
 
 install.packages("")
+library(vars)
 library(urca)
 library(tseries)
 library(tsDyn)
@@ -13,6 +14,7 @@ library(readxl)
 ##
 "
 1. test for cointegration of ip & m1
+  They are cointegrated! r = 1, so there´s only one cointegrating relationship
 1a. if cointrgration doesnt exist then use VAR
 2. use the tests from the course to in order to not include unrelated but (together) cointegrated variables
 
@@ -20,18 +22,34 @@ library(readxl)
 "
 ##
 data = read_excel("MoneyIncome.xlsx")
+
+#tests for stationarity----
 plot(data$t, data$ip)
 plot(data$t, data$m1)
-plot(c(data$t, data$t), c(data$m1, data$ip))
+adf.test(data$ip)
+adf.test(data$m1)
 summary(data)
-######
+#testing for cointegration----
+VARselect(data[,2:3], lag.max = 12, type = "const", season = 12)$select #displays a bunch of information criterion values, 10 seems to be a good number 
+cointest = ca.jo(data[,2:3], type = "trace", ecdet = "const", season = 12)
+cointest@cval
+cointest@teststat[2] #H0: r = 0 don´t reject at 5% level, critical value is 19.96 - According to the testing procedure, we stop testing for cointegrating beacuse we find that there is not cointegrating relationship
+#previous studies have indicated that the 80s is a bad period to include, because it´s strange
+summary(cointest)
+# pre 1980s
+
+
+
+
+
+
 data[,2:3]
 po.test(data[,2:3])
 tsdata = ts(data)
 VectorError = VECM(tsdata[,2:3], lag = 1, r = 1, include = "const") #VECM MUST have time series
 summary(VectorError)
 
-dl = dynlm(ip ~ m1 + m1lag1, data = test)
+dl = dynlm(ip ~ m1 + m1lag1, data = tsdata)
 plot(dl$residuals)
 ###-----
 #testing if VAR might be any good, forgot to take first difference on the linear regression parts :(
@@ -53,3 +71,26 @@ summary(dl)
 
 grangertest(data$ip, data$m1, 2)
 linearHypothesis(dl,"m1lag1 - m1lag2" )
+naive = lm(ip ~ m1, data = data)
+plot(naive$residuals)
+print(data[,2:3])
+
+var1 = VAR(data[,2:3],p = 2, type = "const")
+print(var1)
+summary(var1)  
+
+
+
+#TRASH TRASH TRASH TRASH--------
+datapre80 = data[1:252,]
+VARselect(datapre80[,2:3], lag.max = 12, type = "const", season = 12)$select #displays a bunch of information criterion values, 10 seems to be a good number 
+cointestpre80 = ca.jo(datapre80[,2:3], type = "trace", ecdet = "const", season = 12)
+cointestpre80@cval
+cointestpre80@teststat[1] #H0: r = 0 is not rejected at % level, critical value is 19.96
+
+#post 1980s
+datapost80 = data[373:length(data),]
+VARselect(datapost80[,2:3], lag.max = 12, type = "const", season = 12)$select #displays a bunch of information criterion values, 10 seems to be a good number 
+cointestpost80 = ca.jo(datapost80[,2:3], type = "trace", ecdet = "const", season = 12)
+cointestpost80@cval
+cointestpost80@teststat[1] #H0: r = 0 is not rejected at 5% level, critical value is 19.96
