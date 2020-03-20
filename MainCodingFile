@@ -32,9 +32,6 @@ summary(data)
 #testing for cointegration----
 VARselect(data[,2:3], lag.max = 12, type = "const", season = 12)$select #displays a bunch of information criterion values, 10 seems to be a good number 
 cointest = ca.jo(data[,2:3], type = "trace", ecdet = "const", season = 12)
-cointest@cval
-cointest@teststat[2] #H0: r = 0 don´t reject at 5% level, critical value is 19.96 - According to the testing procedure, we stop testing for cointegrating beacuse we find that there is not cointegrating relationship
-#previous studies have indicated that the 80s is a bad period to include, because it´s strange
 summary(cointest)
 # pre 1980s
 
