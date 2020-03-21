@@ -54,22 +54,22 @@ coefPI(vecm_80)
 plot(vecm_full)
 # how VECM interprets significance codes: ** = 0.001    * = 0.01    . = 0.05
 #VAR-----
-Var_full = VAR(diff(ts(data[,2:3])), p =4 , type = "const", season = 12)
-summary(Var1)
-causality(Var_full, cause = "m1") #the one of interest, m1 does not cause ip
+Var_full = VAR(diff(ts(data[,2:3])), p =10 , type = "const", season = 12)
+summary(Var_full)
+causality(Var_full, cause = "m1") #the one of interest, m1 DOES cause ip
 causality(Var_full, cause = "ip") #aux causality, ip causes m1
 
-Var_pre = VAR(diff(ts(datapre80[,2:3])), p =4 , type = "const", season = 12)
+Var_pre = VAR(diff(ts(datapre80[,2:3])), p =10 , type = "const", season = 12)
 summary(Var_pre)
 causality(Var_pre, cause = "m1") # m1 does not cause ip
 causality(Var_pre, cause = "ip")
 
-Var_post = VAR(diff(ts(datapost80[,2:3])), p =4 , type = "const", season = 12)
+Var_post = VAR(diff(ts(datapost80[,2:3])), p =10 , type = "const", season = 12)
 summary(Var_post)
 causality(Var_post, cause = "m1")  # m1 does not cause ip
 causality(Var_post, cause = "ip")
 
-Var_80 = VAR(diff(ts(data80[,2:3])), p =4 , type = "const", season = 12)
+Var_80 = VAR(diff(ts(data80[,2:3])), p =10 , type = "const", season = 12)
 summary(Var_80)
 causality(Var_80, cause = "m1")  # m1 DOES cause ip
 causality(Var_80, cause = "ip")
