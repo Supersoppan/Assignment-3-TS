@@ -1,4 +1,4 @@
-setwd("E:\\Harddrive\\OneDrive - Lund University\\Mastern\\Spring 2020\\NEKN34 Time Series Analysis\\Assignments\\Ass 3")
+setwd("E:\\Harddrive\\OneDrive - Lund University\\Mastern\\Spring 2020\\NEKN34 Time Series Analysis\\Assignments\\Ass 3\\Assignment-3-TS")
 getwd()
 
 install.packages("")
@@ -11,6 +11,7 @@ library(car)
 library(data.table) #used for shifting, aka lagging
 library(dynlm)
 library(readxl)
+library(ggplot2)
 
 
 data = read_excel("MoneyIncome.xlsx")
@@ -21,6 +22,31 @@ plot(data$t, data$m1)
 adf.test(data$ip)
 adf.test(data$m1)
 summary(data)
+
+
+plot(diff(data$ip))
+plot(diff(data$m1))
+adf.test(diff(data$ip))
+adf.test(diff(data$m1))
+
+
+coeff <- 10
+
+ggplot(data, aes(x =t))+
+  geom_line(aes(y = ip))
+
+
+#make them identifiable
+ggplot(data, aes(x=t)) +
+  geom_line( aes(y=ip, colour = "Industrial Production")) + 
+  geom_line( aes(y=m1 / coeff, colour = "Money/10")) + 
+  scale_y_continuous(
+    name = "Money/10",
+    sec.axis = sec_axis(~.*coeff, name="Industrial Production")) +
+  theme(legend.position= c(0.5, 0.9)) +
+  xlab("Date")
+  
+
 #testing for cointegration----
 VARselect(data[,2:3], lag.max = 10, type = "const", season = 12)$select #displays a bunch of information criterion values, 10 seems to be a good number of lags
 cointest = ca.jo(data[,2:3], type = "trace", ecdet = "const", season = 12)
@@ -50,8 +76,7 @@ summary(vecm_post)
 #during 80s dataset
 vecm_80 = VECM(data80[,2:3], lag = 10, r = 1, estim = "2OLS")
 summary(vecm_80) 
-coefPI(vecm_80)
-plot(vecm_full)
+
 # how VECM interprets significance codes: ** = 0.001    * = 0.01    . = 0.05
 #VAR-----
 Var_full = VAR(diff(ts(data[,2:3])), p =10 , type = "const", season = 12)
