@@ -47,6 +47,7 @@ ggplot(data, aes(x=t)) +
   xlab("Date")
   
 
+
 #testing for cointegration----
 VARselect(data[,2:3], lag.max = 10, type = "const", season = 12)$select #displays a bunch of information criterion values, 10 seems to be a good number of lags
 cointest = ca.jo(data[,2:3], type = "trace", ecdet = "const", season = 12)
